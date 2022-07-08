@@ -70,9 +70,9 @@ void logInfo(const std::string & source, const std::string & log, std::set<std::
             currentLog.insert(path);
         }
     }
-    for (const auto & path: lastLog) {
-        logOperation(path, myFile, removed);
-        logOperation(path, std::cout, removed);
+    for (const auto & str: lastLog) {
+        logOperation(str, myFile, removed);
+        logOperation(str, std::cout, removed);
     }
     myFile << "\n";
     myFile.close();
