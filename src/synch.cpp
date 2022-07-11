@@ -9,14 +9,30 @@
 namespace fs = std::filesystem;
 
 /**
- * Read source folder path, replica folder path, synchronization interval, log file path from input.
+ * Check if string represents positive integer or not.
  *
- * Source folder path, replica folder path, synchronization interval and log file path are read from standard input.
+ * @param[in] str   string to check
+ * @returns true if str represents integer, false otherwise
+ */
+bool isPositiveInteger(const std::string & str) {
+    if (str.empty())
+        return false;
+    std::string::const_iterator it = str.begin();
+    while (it != str.end()) {
+        if (!std::isdigit(*it))
+            return false;
+        ++it;
+    }
+    return true;
+}
+/**
+ * Read source folder path, replica folder path, synchronization interval, log file path from command line arguments.
+ *
+ * Source folder path, replica folder path, synchronization interval and log file path are read from command line arguments.
  * Reading is not successful:
- * - if source folder path is not a valid string or is not a folder path,
- * - if replica folder path is not a valid string,
- * - if synchronization interval is not a valid integer or is less than 0,
- * - if log file path is not a valid string
+ * - if command line arguments are less than 5 ( folder paths + synchronization interval + log file path and name of the program),
+ * - if source folder path is not a folder path,
+ * - if synchronization interval is not a valid integer or is less than 0
  *
  * @param[out] source   source folder path
  * @param[out] replica  replica folder path
@@ -24,19 +40,18 @@ namespace fs = std::filesystem;
  * @param[out] log      log file path
  * @returns true if reading is successful, false otherwise
  */
-bool readInput(std::string & source, std::string & replica, int & interval, std::string & log) {
-    std::cout << "Enter source folder path:" << std::endl;
-    if (!(std::cin >> source) || !fs::is_directory(source))
+bool readArguments(int argc, char ** argv, std::string & source, std::string & replica, int & interval, std::string & log) {
+    if (argc < 5)
         return false;
-    std::cout << "Enter replica folder path:" << std::endl;
-    if (!(std::cin >> replica))
+    source = argv[1];
+    if (!fs::is_directory(source))
         return false;
-    std::cout << "Enter synchronization interval in seconds:" << std::endl;
-    if (!(std::cin >> interval) || interval < 0)
+    replica = argv[2];
+    if (!isPositiveInteger(argv[3]))
         return false;
-    std::cout << "Enter log file path:" << std::endl;
-    if (!(std::cin >> log))
-        return false;
+    std::stringstream intervalString(argv[3]);
+    intervalString >> interval;
+    log = argv[4];
     return true;
 }
 
@@ -148,7 +163,7 @@ bool synchronize(const std::string & source, const std::string & replica, int in
 }
 
 /**
- * Waits until user enters quit. After quit is entered, signal to quit is set on true.
+ * Wait until user enters quit. After quit is entered, signal to quit is set on true.
  *
  * @param[out] quit   signal to quit
  */
@@ -162,10 +177,10 @@ void waitForQuit(bool & quit) {
     }
 }
 
-int main() {
+int main(int argc, char * argv[]) {
     std::string source, replica, log;
     int interval;
-    if (!readInput(source, replica, interval, log)) {
+    if (!readArguments(argc, argv, source, replica, interval, log)) {
         std::cout << "Bad input." << std::endl;
         return 0;
     }
