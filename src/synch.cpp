@@ -25,6 +25,7 @@ bool isPositiveInteger(const std::string & str) {
     }
     return true;
 }
+
 /**
  * Read source folder path, replica folder path, synchronization interval, log file path from command line arguments.
  *
